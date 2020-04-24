@@ -2,13 +2,9 @@ import React, { Component } from "react";
 import classes from "./App.css";
 import Persons from "../components/Persons/Persons";
 import Cockpit from "../components/Cockpit/Cockpit";
+import AuthContext from "../context/auth-context";
 
 class App extends Component {
-  constructor(props) {
-    super(props);
-    console.log("[App.js] constructor");
-  }
-
   state = {
     persons: [
       { id: "odsfoweo", name: "Levi", age: 36 },
@@ -17,16 +13,8 @@ class App extends Component {
     ],
     otherState: "some other value",
     showPersons: false,
+    authenticated: false,
   };
-
-  static getDerivedStateFromProps(props, state) {
-    console.log("[App.js] getDerivedStateFromProps", props);
-    return state;
-  }
-
-  componentDidMount() {
-    console.log("[App.js] componentDidMount");
-  }
 
   nameChangedHandler = (event, id) => {
     const personIndex = this.state.persons.findIndex((p) => {
@@ -56,8 +44,11 @@ class App extends Component {
     this.setState({ showPersons: !doesShow });
   };
 
+  loginHandler = () => {
+    this.setState({ authenticated: true });
+  };
+
   render() {
-    console.log("[App.js] render");
     let persons = null;
 
     if (this.state.showPersons) {
@@ -66,19 +57,27 @@ class App extends Component {
           persons={this.state.persons}
           onClick={this.deletePersonHandler}
           nameChanged={this.nameChangedHandler}
+          isAuthenticated={this.state.authenticated}
         />
       );
     }
 
     return (
       <div className={classes.App}>
-        <Cockpit
-          title={this.props.title}
-          showPersons={this.state.showPersons}
-          persons={this.state.persons}
-          onClick={this.togglePersonsHandler}
-        />
-        {persons}
+        <AuthContext.Provider
+          value={{
+            authenticated: this.state.authenticated,
+            login: this.loginHandler,
+          }}
+        >
+          <Cockpit
+            title={this.props.title}
+            showPersons={this.state.showPersons}
+            persons={this.state.persons}
+            onClick={this.togglePersonsHandler}
+          />
+          {persons}
+        </AuthContext.Provider>
       </div>
     );
   }
